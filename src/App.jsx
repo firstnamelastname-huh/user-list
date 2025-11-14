@@ -20,11 +20,42 @@ function App() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://jsonplaceholder.typicode.com/users');
+
+      // --------------------------------------------
+      // CHANGE THIS URL TO YOUR NEW API URL
+      // --------------------------------------------
+      const response = await fetch('https://example.com/api/random-users');
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
-      setUsers(data);
-      setFilteredUsers(data);
+
+      // --------------------------------------------
+      // TRANSFORM THE NEW API STRUCTURE HERE
+      //
+      // Example random structure:
+      // {
+      //   "uid": 101,
+      //   "fullName": "John Doe",
+      //   "mail": "john@gmail.com",
+      //   "mobile": "9838383883",
+      //   "location": "Mumbai",
+      //   "workplace": "TechCorp"
+      // }
+      //
+      // You ONLY need to edit this mapping block
+      // when using a different API.
+      // --------------------------------------------
+      const mappedUsers = data.map((u) => ({
+        id: u.uid,                     // change if your API uses a different primary key
+        name: u.fullName,              // replace with your name field
+        username: u.userName || '',    // optional (fallback)
+        email: u.mail,                 // replace with your email field
+        phone: u.mobile,               // replace with your phone field
+        address: { city: u.location }, // replace with your city field
+        company: { name: u.workplace } // replace with your company field
+      }));
+
+      setUsers(mappedUsers);
+      setFilteredUsers(mappedUsers);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -40,7 +71,7 @@ function App() {
       result = result.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
+        (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
